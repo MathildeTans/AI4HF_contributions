@@ -82,11 +82,11 @@ data_preprocessing <- function(
   # we split at the patient level.
   # 
   # In this case, the outcomes are binary: 1 if event occurred, 0 if it did not.
-  # Here, patients are grouped by ever having experience the primary outcome.
-  # Namely, "max(outcome_col)" only returns 1 if the patient experienced the outcome
+  # Here, patients are grouped by ever having experienced the primary outcome.
+  # Namely, "max(outcome_col)" returns 1 if the patient experienced the outcome
   # for at least one encounter.
   # 
-  # After this section, all decision will be made using the train set.
+  # After this section, all decision will be made based on the train set.
   
   patient_strata <- dt[, .(stratum_outcome = max(outcome_col)), 
                        by = Pseudo_id,
@@ -108,10 +108,10 @@ data_preprocessing <- function(
   train <- dt[Pseudo_id %in% train_ids]
   test  <- dt[Pseudo_id %in% test_ids]
   
-  rm(patient_strata, patient_split, train_ids, test_ids); gc()
+  rm(patient_strata, patient_split, train_ids, test_ids, dt); gc()
   
   # ---- (2.1) Require lowerbound prevalence for binary variables ----------------
-  # Te prevalence boundary indicates the prevalence that should be present for binary
+  # The prevalence boundary indicates the prevalence that should be present for binary
   # features to be included in the analyses. This reflects the number of encounters where, e.g., 
   # a condition is registered or a medication is used. If less than, say, 1% of 
   # encounters has a registration for a condition, we discard this condition as a feature.
@@ -129,7 +129,7 @@ data_preprocessing <- function(
     predictors        <- setdiff(predictors,        drop_cols)
   }
   
-  rm(prev_boundary, tmp, result, drop_cols);gc()
+  rm(prev_boundary, tmp, result, drop_cols); gc()
   
   # ---- (2.2) Drop variables with >50% missingness ------------------------------
   # Continuous features may contain missingness. If a feature has more than, say, 50%
@@ -137,7 +137,7 @@ data_preprocessing <- function(
   # regardless.
   
   missingness <- train[, lapply(.SD, \(x) mean(is.na(x))), .SDcols = predictors_continuous]
-  drop_cols   <- names(missingness)[missingness > allowed_missingness]
+  drop_cols   <- names(missingness[missingness > allowed_missingness])
   
   # Override drop_cols here for clinically essential features to keep
   drop_cols <- setdiff(drop_cols, override_missingness)
@@ -190,7 +190,7 @@ data_preprocessing <- function(
   rm(cor_matrix, cor_pairs, drop); gc()
   
   # ---- (4) Check for >1 unique values per feature ------------------------------
-  # Features should contain at least 2 unique values in order to (possibly) inform
+  # Features should contain at least 2 unique values to have the ability to inform
   # the outcome. Namely, a feature with only 1 unique value would act as the intercept.
   # Since a model can only contain one intercept, we must discard features with only
   # one unique value.
@@ -215,7 +215,7 @@ data_preprocessing <- function(
   # a prediction matrix and a method.
   # 
   # If the data contains p columns, the prediction matrix is a (p x p) binary matrix,
-  # where cell (i,j) shows 1 if feature j is used to impute feature i, and 0 if not.
+  # where cell (i,j) contains 1 if feature j is used to impute feature i, and 0 if not.
   # The function called from mice, "quickpred", makes a prediction matrix where it assigns
   # a 1 to a cell if the corresponding features are sufficiently correlated. Namely,
   # if they are not correlated, feature j will not carry enough information to impute 
@@ -223,8 +223,8 @@ data_preprocessing <- function(
   # (see the mice documentation). 
   # It is also possible to exclude variables. It is extremely important that the 
   # outcomes are excluded. These should not be used to impute missing values. However, 
-  # a study from 2006 showed that it will decrease bias is the primary outcome is used
-  # for the imputation. Hence, note that below the primary outcome is not excluded. 
+  # a study from 2006 showed that bias will decrease if the primary outcome is used
+  # for the imputation. Hence, note that below, the primary outcome is _not_ excluded. 
   # See https://doi.org/10.1016/j.jclinepi.2006.01.009. 
   # 
   # The method is a vector with an element for each feature and indicates which method
