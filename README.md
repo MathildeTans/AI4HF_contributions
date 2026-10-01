@@ -1,4 +1,4 @@
-# DT4H_AI4HF_contributions
+# AI4HF_contributions
 
 ## Data preprocessing examples
 This repo currently contains an R file with a function that walks through some preprocessing steps.
