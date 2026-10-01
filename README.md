@@ -1,5 +1,4 @@
 # DT4H_AI4HF_contributions
-Contributions to the DT4H and AI4HF consortia.
 
 ## Data preprocessing examples
 This repo currently contains an R file with a function that walks through some preprocessing steps.
