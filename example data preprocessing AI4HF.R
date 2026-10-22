@@ -137,7 +137,7 @@ data_preprocessing <- function(
   # regardless.
   
   missingness <- train[, lapply(.SD, \(x) mean(is.na(x))), .SDcols = predictors_continuous]
-  drop_cols   <- names(missingness[missingness > allowed_missingness])
+  drop_cols   <- names(missingness)[missingness > allowed_missingness]
   
   # Override drop_cols here for clinically essential features to keep
   drop_cols <- setdiff(drop_cols, override_missingness)
@@ -156,7 +156,7 @@ data_preprocessing <- function(
   # if predictors are too correlated. We randomly discard one feature in a pair
   # of highly correlated features.
   
-  cor_matrix <- cor(dt[, ..predictors], 
+  cor_matrix <- cor(train[, ..predictors], 
                     use    = "pairwise.complete.obs", 
                     method = "pearson")
   cor_matrix[lower.tri(cor_matrix, diag=TRUE)] <- NA
@@ -264,7 +264,7 @@ data_preprocessing <- function(
     dt <- as.data.table(mice::complete(imp, i))
     dt[, `:=`(
       Pseudo_id        = combined$Pseudo_id,
-      PatientContactid = combined$PatientContactId
+      PatientContactId = combined$PatientContactId
     )]
     list(
       train = dt[!ignore_vec],
