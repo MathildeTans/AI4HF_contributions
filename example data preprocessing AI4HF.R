@@ -164,7 +164,7 @@ data_preprocessing <- function(
   cor_pairs <- as.data.table(as.table(cor_matrix))
   setnames(cor_pairs, c("col1", "col2", "correlation"))
   cor_pairs <- cor_pairs[!is.na(correlation) & abs(correlation) >= tolerated_correlation]
-  cor_pairs[order(-abs(correlation))]
+  cor_pairs <- cor_pairs[order(-abs(correlation))]
   
   set.seed(dropping_seed)
   drop <- character(0)
